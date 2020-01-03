@@ -45,10 +45,6 @@ inline ht_node *ht_find(ht_db *db, char *key, char *key_eof, ht_node ***parent)
 	uint64_t hash = weedit_crc32(0xffffffff, (uint8_t*)key, size) ^ 0xffffffff;
 	ht_node *node = db->node[hash & HT_HASHMASK];
 	*parent = &db->node[hash & HT_HASHMASK];
-	if (!node)
-	{
-		return 0;
-	}
 	while (node)
 	{
 		if (size == (node->size & HT_SIZEMASK))
@@ -135,7 +131,7 @@ uint64_t ht_insert(ht_db *db, char *key, char *key_eof, void **value, int update
 		}
 		return HT_ERROR_OK;
 	}
-	node = calloc(1, sizeof(ht_node) + size);
+	node = calloc(1, sizeof(ht_node) - 1 + size);
 	if (!node)
 		return HT_ERROR_NOMEM;
 	if (value)
