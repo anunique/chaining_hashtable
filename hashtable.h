@@ -1,7 +1,7 @@
 /********************************************************************************************
 * basic chaining hashtable implementation v1.00                                             *
 *                                                                                           *
-* Copyright (c) 2019, <anunique at gmail dot com>                                           *
+* Copyright (c) 2020, <anunique at gmail dot com>                                           *
 * All rights reserved.                                                                      *
 *                                                                                           *
 * Redistribution and use in source and binary forms, with or without                        *
