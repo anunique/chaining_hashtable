@@ -65,7 +65,7 @@ inline ht_node *ht_find(ht_db *db, char *key, char *key_eof, ht_node ***parent)
 }
 
 /*
-art_createdb
+ht_createdb
 	Creates an empty database object.
 
 RETURN VALUE:
