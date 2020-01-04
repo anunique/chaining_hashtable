@@ -1,5 +1,5 @@
 /********************************************************************************************
-* basic chaining hashtable implementation v1.00                                             *
+* basic chaining hashtable implementation v1.02                                             *
 *                                                                                           *
 * Copyright (c) 2020, <anunique at gmail dot com>                                           *
 * All rights reserved.                                                                      *
@@ -29,6 +29,15 @@
 *                                                                                           *
 * have fun and w0000h00000 -CW- loves you all                                               *
 ********************************************************************************************/
+/*
+changelog
+v1.02 change char *key_eof to size_t key_len
+v1.01 remove unnecessary if in ht_find and fix memory size in ht_insert, 
+      thx @ yoda for the code review
+v1.00 basic init
+
+*/
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -39,17 +48,16 @@
 ht_find
 	internal function to find a key inside of the hashtable
 */
-inline ht_node *ht_find(ht_db *db, char *key, char *key_eof, ht_node ***parent)
+inline ht_node *ht_find(ht_db *db, char *key, size_t key_len, ht_node ***parent)
 {
-	uint64_t size = key_eof - key;
-	uint64_t hash = weedit_crc32(0xffffffff, (uint8_t*)key, size) ^ 0xffffffff;
+	uint64_t hash = weedit_crc32(0xffffffff, (uint8_t*)key, key_len) ^ 0xffffffff;
 	ht_node *node = db->node[hash & HT_HASHMASK];
 	*parent = &db->node[hash & HT_HASHMASK];
 	while (node)
 	{
-		if (size == (node->size & HT_SIZEMASK))
+		if (key_len == (node->size & HT_SIZEMASK))
 		{
-			if (0 == memcmp(&node->key, key, size))
+			if (0 == memcmp(&node->key, key, key_len))
 			{
 				return node;
 			}
@@ -112,11 +120,10 @@ RETURN VALUES :
 	HT_ERROR_OK			: key successfully deleted
 	HT_ERROR_NOMEM		: ran out of memory, cannot insert the key
 */
-uint64_t ht_insert(ht_db *db, char *key, char *key_eof, void **value, int update)
+uint64_t ht_insert(ht_db *db, char *key, size_t key_len, void **value, int update)
 {
 	ht_node **parent;
-	ht_node *node = ht_find(db, key, key_eof, &parent);
-	uint64_t size = key_eof - key;
+	ht_node *node = ht_find(db, key, key_len, &parent);
 	if (node)
 	{
 		if (value)
@@ -127,21 +134,20 @@ uint64_t ht_insert(ht_db *db, char *key, char *key_eof, void **value, int update
 			}
 			node->value = *value;
 			node->size |= HT_GOTVALUE;
-
 		}
 		return HT_ERROR_OK;
 	}
-	node = calloc(1, sizeof(ht_node) - 1 + size);
+	node = calloc(1, sizeof(ht_node) - 1 + key_len);
 	if (!node)
 		return HT_ERROR_NOMEM;
 	if (value)
 	{
-		node->size = size | HT_GOTVALUE;
+		node->size = key_len | HT_GOTVALUE;
 		node->value = *value;
 	}
 	else
-		node->size = size;
-	memcpy(&node->key, key, size);
+		node->size = key_len;
+	memcpy(&node->key, key, key_len);
 	*parent = node;
 	return HT_ERROR_OK;
 }
@@ -159,10 +165,10 @@ RETURN VALUES :
 	HT_ERROR_NOTFOUND	: key doesnt exist
 	HT_ERROR_OK			: key successfully deleted
 */
-uint64_t ht_delete(ht_db *db, char *key, char *key_eof)
+uint64_t ht_delete(ht_db *db, char *key, size_t key_len)
 {
 	ht_node **parent;
-	ht_node *node = ht_find(db, key, key_eof, &parent);
+	ht_node *node = ht_find(db, key, key_len, &parent);
 	if (!node)
 		return HT_ERROR_NOTFOUND;
 	*parent = node->next;
@@ -185,10 +191,10 @@ RETURN VALUES:
 	HT_RESULT_GOTVALUE	: key exists and value is set to the key value
 	HT_RESULT_ISKEY		: key exists but no value
 */
-uint64_t ht_get(ht_db *db, char *key, char *key_eof, void **value)
+uint64_t ht_get(ht_db *db, char *key, size_t key_len, void **value)
 {
 	ht_node **parent;
-	ht_node *node = ht_find(db, key, key_eof, &parent);
+	ht_node *node = ht_find(db, key, key_len, &parent);
 	if (!node)
 		return HT_RESULT_NOTFOUND;
 	if (node->size & HT_GOTVALUE)

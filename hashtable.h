@@ -1,5 +1,5 @@
 /********************************************************************************************
-* basic chaining hashtable implementation v1.00                                             *
+* basic chaining hashtable implementation v1.02                                             *
 *                                                                                           *
 * Copyright (c) 2020, <anunique at gmail dot com>                                           *
 * All rights reserved.                                                                      *
@@ -66,6 +66,6 @@ typedef struct  {
 //check .c file for comments
 ht_db *ht_createdb(void);
 void ht_deletedb(ht_db **db);
-uint64_t ht_insert(ht_db *db, char *new_key, char *new_key_eof, void **value, int update);
-uint64_t ht_delete(ht_db *db, char *key, char *key_eof);
-uint64_t ht_get(ht_db *db, char *key, char *key_eof, void **value);
+uint64_t ht_insert(ht_db *db, char *new_key, size_t key_len, void **value, int update);
+uint64_t ht_delete(ht_db *db, char *key, size_t key_len);
+uint64_t ht_get(ht_db *db, char *key, size_t key_len, void **value);
